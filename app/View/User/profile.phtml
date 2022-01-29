@@ -1,0 +1,26 @@
+<?php
+/**
+ * Profile template
+ *
+ * Created by PhpStorm.
+ * User: Nikita Zimin
+ * Date: 29.01.2022
+ * Time: 21:31
+ *
+ * @var User $user
+ */
+
+use App\Model\User;
+
+?>
+
+<?php
+if ($user): ?>
+    name: <?= $user->getName() ?> <br>
+    gender: <?= $user->getGenderString() ?> <br>
+    registered: <?= $user->getCreatedAt() ?>
+<?php
+else: ?>
+    Пользователь не найден
+<?php
+endif; ?>

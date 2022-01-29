@@ -7,6 +7,7 @@
  */
 
 include '../vendor/autoload.php';
+include '../src/config.php';
 
 $app = new \Core\Application();
 $app->run();

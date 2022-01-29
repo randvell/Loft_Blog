@@ -38,7 +38,9 @@ class Application
             $this->initController();
             $this->initAction();
 
-            $this->controller->{$this->actionName}();
+            $view = new View();
+            $this->controller->setView($view);
+            echo $this->controller->{$this->actionName}();
         } catch (Redirect $r) {
             header('Location: ' . $r->getUrl());
         } catch (RouteException $e) {

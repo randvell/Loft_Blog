@@ -12,6 +12,16 @@ use Core\Exception\Redirect;
 
 abstract class AbstractController
 {
+    protected View $view;
+
+    /**
+     * @param View $view
+     */
+    public function setView(View $view): void
+    {
+        $this->view = $view;
+    }
+
     /**
      * Выполнение переадресации
      *

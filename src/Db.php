@@ -127,10 +127,10 @@ class Db
     /**
      * Получить PK последней записи
      *
-     * @return string|null
+     * @return int|null
      */
-    public function getLastInsertId(): ?string
+    public function getLastInsertId(): ?int
     {
-        return $this->getConnection()->lastInsertId() ?: null;
+        return (int)$this->getConnection()->lastInsertId() ?: null;
     }
 }
