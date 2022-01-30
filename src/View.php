@@ -11,6 +11,7 @@ namespace Core;
 class View
 {
     private string $templatePath;
+    private $data = [];
 
     /**
      * View constructor.
@@ -21,18 +22,39 @@ class View
     }
 
     /**
+     * Добавит переменную в окружение
+     *
+     * @param string $name
+     * @param $value
+     */
+    public function assign(string $name, $value)
+    {
+        $this->data[$name] = $value;
+    }
+
+    /**
      * Рендерим шаблон
      *
      * @param string $tpl
-     * @param array $params
+     * @param array $data
      *
      * @return string
      */
-    public function render(string $tpl, array $params = []): string
+    public function render(string $tpl, array $data = []): string
     {
-        extract($params, EXTR_OVERWRITE);
+        $this->data += $data;
         ob_start();
         include $this->templatePath . '/' . $tpl;
         return ob_get_clean();
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed|null
+     */
+    public function __get(string $name)
+    {
+        return $this->data[$name] ?? null;
     }
 }

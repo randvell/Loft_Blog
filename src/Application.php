@@ -10,6 +10,7 @@ namespace Core;
 
 use App\Controller\Blog;
 use App\Controller\User;
+use App\Model\User as UserModel;
 use Core\Exception\Redirect;
 use Core\Exception\Route as RouteException;
 
@@ -34,19 +35,42 @@ class Application
     public function run(): void
     {
         try {
+            session_start();
             $this->addRoutes();
             $this->initController();
             $this->initAction();
 
             $view = new View();
             $this->controller->setView($view);
-            echo $this->controller->{$this->actionName}();
+            $this->initUser();
+
+            $content = $this->controller->{$this->actionName}();
+
+            echo $content;
         } catch (Redirect $r) {
             header('Location: ' . $r->getUrl());
         } catch (RouteException $e) {
             echo $e->getMessage();
             header('HTTP/1.0 404 Not Found');
         }
+    }
+
+    /**
+     * Установка контекста пользователя из сессии
+     */
+    private function initUser(): void
+    {
+        $id = $_SESSION['id'] ?? null;
+        if (is_null($id)) {
+            return;
+        }
+
+        $user = UserModel::getById($id);
+        if (!$user) {
+            return;
+        }
+
+        $this->controller->setUser($user);
     }
 
     /**

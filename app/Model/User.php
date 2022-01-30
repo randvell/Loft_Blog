@@ -23,6 +23,7 @@ class User extends AbstractModel
 
     private ?int $id;
     private ?string $name;
+    private ?string $login;
     private ?string $password;
     private ?string $createdAt;
     private ?int $gender;
@@ -36,11 +37,31 @@ class User extends AbstractModel
     {
         if ($data) {
             $this->id = $data['id'];
+            $this->login = $data['login'];
             $this->name = $data['name'];
             $this->password = $data['password'];
             $this->gender = $data['gender'];
             $this->createdAt = $data['created_at'];
         }
+    }
+
+    /**
+     * Получение пользователя по логину и паролю
+     *
+     * @param string $login
+     *
+     * @return static|null
+     */
+    public static function getByLogin(string $login): ?self
+    {
+        $db = Db::getInstance();
+        $select = 'SELECT * FROM users WHERE `login` = :login';
+        $data = $db->fetchOne($select, [':login' => $login]);
+        if (!$data) {
+            return null;
+        }
+
+        return new self($data);
     }
 
     /**
@@ -164,8 +185,8 @@ class User extends AbstractModel
     public function save(): ?int
     {
         $db = Db::getInstance();
-        $insert = 'INSERT INTO users (`name`, `password`, `gender`) VALUES (:name, :password, :gender)';
-        $db->exec($insert, [':name' => $this->getName(), 'password' => $this->getPassword(), ':gender' => $this->getGender()]);
+        $insert = 'INSERT INTO users (`login`, `name`, `password`, `gender`) VALUES (:login, :name, :password, :gender)';
+        $db->exec($insert, ['login' => $this->getLogin(), ':name' => $this->getName(), 'password' => $this->getPassword(), ':gender' => $this->getGender()]);
 
         $id = $db->getLastInsertId();
         if (is_null($id)) {
@@ -198,5 +219,24 @@ class User extends AbstractModel
     public static function getPasswordHash(string $password): string
     {
         return sha1('loftschool-' . $password);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLogin(): ?string
+    {
+        return $this->login;
+    }
+
+    /**
+     * @param string|null $login
+     *
+     * @return User
+     */
+    public function setLogin(?string $login): self
+    {
+        $this->login = $login;
+        return $this;
     }
 }

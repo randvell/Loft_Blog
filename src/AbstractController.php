@@ -8,11 +8,13 @@
 
 namespace Core;
 
+use App\Model\User;
 use Core\Exception\Redirect;
 
 abstract class AbstractController
 {
     protected View $view;
+    protected ?User $user;
 
     /**
      * @param View $view
@@ -20,6 +22,16 @@ abstract class AbstractController
     public function setView(View $view): void
     {
         $this->view = $view;
+    }
+
+    /**
+     * Установление контекста пользователя
+     *
+     * @param User $user
+     */
+    public function setUser(User $user): void
+    {
+        $this->user = $user;
     }
 
     /**

@@ -12,12 +12,12 @@ use Core\AbstractController;
 
 class Blog extends AbstractController
 {
-    public function indexAction(): void
+    public function indexAction()
     {
-        if (isset($_GET['redirect'])) {
-            $this->redirect($_GET['redirect']);
+        if (!$user = $this->user) {
+            $this->redirect('/user/register');
         }
 
-        echo __METHOD__;
+        return $this->view->render('Blog/index.phtml', ['user' => $user]);
     }
 }
