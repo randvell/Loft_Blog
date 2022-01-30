@@ -13,8 +13,9 @@
 Регистрация:
 <form action="/user/register" method="post">
     Имя: <input type="text" name="name"> <br>
-    Логин: <input type="text" name="login"> <br>
+    Email: <input type="text" name="email"> <br>
     Пароль: <input type="password" name="password"> <br>
+    Подтверждение пароля: <input type="password" name="password_confirmation"> <br>
     <input type="submit" value="Зарегистрироваться">
 </form>
 <br>
@@ -22,7 +23,7 @@
 
 Войти
 <form action="/user/login" method="post">
-    Логин: <input type="text" name="login"> <br>
+    Email: <input type="text" name="email"> <br>
     Пароль: <input type="password" name="password"> <br>
     <input type="submit" value="Войти">
 </form>

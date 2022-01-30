@@ -9,6 +9,7 @@
 namespace App\Model;
 
 use Core\AbstractModel;
+use Core\Administration;
 use Core\Db;
 
 /**
@@ -23,10 +24,12 @@ class User extends AbstractModel
 
     private ?int $id;
     private ?string $name;
-    private ?string $login;
+    private ?string $email;
     private ?string $password;
     private ?string $createdAt;
     private ?int $gender;
+
+    private ?bool $isAdmin = null;
 
     /**
      * AbstractModel constructor.
@@ -37,9 +40,9 @@ class User extends AbstractModel
     {
         if ($data) {
             $this->id = $data['id'];
-            $this->login = $data['login'];
-            $this->name = $data['name'];
+            $this->email = $data['email'];
             $this->password = $data['password'];
+            $this->name = $data['name'];
             $this->gender = $data['gender'];
             $this->createdAt = $data['created_at'];
         }
@@ -48,15 +51,15 @@ class User extends AbstractModel
     /**
      * Получение пользователя по логину и паролю
      *
-     * @param string $login
+     * @param string $email
      *
      * @return static|null
      */
-    public static function getByLogin(string $login): ?self
+    public static function getByEmail(string $email): ?self
     {
         $db = Db::getInstance();
-        $select = 'SELECT * FROM users WHERE `login` = :login';
-        $data = $db->fetchOne($select, [':login' => $login]);
+        $select = 'SELECT * FROM users WHERE `email` = :email';
+        $data = $db->fetchOne($select, [':email' => $email]);
         if (!$data) {
             return null;
         }
@@ -185,8 +188,14 @@ class User extends AbstractModel
     public function save(): ?int
     {
         $db = Db::getInstance();
-        $insert = 'INSERT INTO users (`login`, `name`, `password`, `gender`) VALUES (:login, :name, :password, :gender)';
-        $db->exec($insert, ['login' => $this->getLogin(), ':name' => $this->getName(), 'password' => $this->getPassword(), ':gender' => $this->getGender()]);
+        $insert = 'INSERT INTO users (`email`, `password`, `name`, `gender`) VALUES (:email, :password, :name, :gender)';
+        $db->exec($insert,
+            [
+                ':email' => $this->getEmail(),
+                ':name' => $this->getName(),
+                ':password' => $this->getPassword(),
+                ':gender' => $this->getGender(),
+            ]);
 
         $id = $db->getLastInsertId();
         if (is_null($id)) {
@@ -214,6 +223,7 @@ class User extends AbstractModel
      * Получить хэш для строки
      *
      * @param string $password
+     *
      * @return string
      */
     public static function getPasswordHash(string $password): string
@@ -224,19 +234,33 @@ class User extends AbstractModel
     /**
      * @return string|null
      */
-    public function getLogin(): ?string
+    public function getEmail(): ?string
     {
-        return $this->login;
+        return $this->email;
     }
 
     /**
-     * @param string|null $login
+     * @param string|null $email
      *
      * @return User
      */
-    public function setLogin(?string $login): self
+    public function setEmail(?string $email): self
     {
-        $this->login = $login;
+        $this->email = $email;
         return $this;
+    }
+
+    /**
+     * Проверка является ли пользователь админом
+     *
+     * @return bool
+     */
+    public function getIsAdmin(): bool
+    {
+        if (is_null($this->isAdmin)) {
+            $this->isAdmin = Administration::getIsAdmin($this->getId());
+        }
+
+        return $this->isAdmin;
     }
 }

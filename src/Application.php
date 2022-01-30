@@ -10,9 +10,11 @@ namespace Core;
 
 use App\Controller\Blog;
 use App\Controller\User;
+use App\Controller\Api;
 use App\Model\User as UserModel;
 use Core\Exception\Redirect;
 use Core\Exception\Route as RouteException;
+use Throwable;
 
 class Application
 {
@@ -52,6 +54,12 @@ class Application
         } catch (RouteException $e) {
             echo $e->getMessage();
             header('HTTP/1.0 404 Not Found');
+        } catch (Throwable $e) {
+            echo 'Произошла ошибка при запросе, повторите попытку позднее';
+
+            // для нужд дебага
+            echo '<pre>' . $e->getMessage() . '</pre>';
+            echo '<pre>' . $e->getTraceAsString() . '</pre>';
         }
     }
 
@@ -86,6 +94,13 @@ class Application
 
         /** @uses Blog::indexAction() */
         $this->router->addRoute('/blog', Blog::class);
+
+        /** @uses Blog::indexAction() */
+        $this->router->addRoute('/blog/delete-post', Blog::class, 'deletePost');
+
+
+        /** @uses Api\Blog::getPostsAction() */
+        $this->router->addRoute('/api/blog/get-posts', Api\Blog::class, 'getPosts');
     }
 
     /**

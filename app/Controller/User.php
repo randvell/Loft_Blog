@@ -11,21 +11,22 @@ namespace App\Controller;
 use App\Model\User as UserModel;
 use Core\AbstractController;
 use Core\Exception\Redirect;
+use Core\Exception\Validation as ValidationException;
 
 class User extends AbstractController
 {
     public function loginAction()
     {
-        if (isset($_POST['login'])) {
-            $login = $_POST['login'] ?? null;
+        if (isset($_POST['email'])) {
+            $login = $_POST['email'];
             $password = $_POST['password'] ?? null;
 
-            $user = UserModel::getByLogin($login);
+            $user = UserModel::getByEmail($login);
             if (!$user) {
-                $this->view->assign('error', 'Введены неверные данные пользователя');
+                $this->setError('Введены неверные данные пользователя');
             }
             if ($user->getPassword() !== UserModel::getPasswordHash($password)) {
-                $this->view->assign('error', 'Введены неверные данные пользователя');
+                $this->setError('Введены неверные данные пользователя');
             }
 
             $_SESSION['id'] = $user->getId();
@@ -42,27 +43,31 @@ class User extends AbstractController
      */
     public function registerAction()
     {
-        if (isset($_POST['login'])) {
-            $gender = 0;
-            $name = $_POST['name'] ?? null;
-            $login = $_POST['login'] ?? null;
-            $password = $_POST['password'] ?? null;
+        try {
+            if (isset($_POST['email'])) {
+                $gender = 0;
+                $name = $_POST['name'] ?? null;
+                $email = $_POST['email'] ?? null;
+                $password = $_POST['password'] ?? null;
+                $passwordConfirmation = $_POST['password_confirmation'] ?? null;
 
-            if (!($success = isset($name, $login, $password))) {
-                $success = false;
-                $this->view->assign('error', 'Не заполнены обязательные поля');
-            }
+                if (!isset($name, $email, $password)) {
+                    throw new ValidationException('Не заполнены обязательные поля');
+                }
+                if (mb_strlen($password) < 4) {
+                    throw new ValidationException('Пароль не соответствует политике безопасности');
+                }
+                if ($password !== $passwordConfirmation) {
+                    throw new ValidationException('Введенные пароли не совпадают');
+                }
+                if (UserModel::getByEmail($email)) {
+                    throw new ValidationException('Такой пользователь уже существует');
+                }
 
-            if (UserModel::getByLogin($login)) {
-                $success = false;
-                $this->view->assign('error', 'Такой пользователь уже существует');
-            }
-
-            if ($success) {
                 $user = (new UserModel())
                     ->setName($name)
                     ->setGender($gender)
-                    ->setLogin($login)
+                    ->setEmail($email)
                     ->setPassword($password, true);
 
                 $userId = $user->save();
@@ -72,6 +77,8 @@ class User extends AbstractController
 
                 $this->redirect('/blog/index');
             }
+        } catch (ValidationException $e) {
+            $this->setError($e->getMessage());
         }
 
         return $this->view->render('User/register.phtml');
