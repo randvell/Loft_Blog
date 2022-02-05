@@ -14,6 +14,7 @@ use Core\AbstractController;
 use Core\Exception\Redirect;
 use Core\Exception\Validation as ValidationException;
 use Core\Helper;
+use Throwable;
 
 class Blog extends AbstractController
 {
@@ -27,8 +28,19 @@ class Blog extends AbstractController
             $this->redirect('/user/register');
         }
 
-        return $this->view->render('Blog/index.phtml',
-            ['user' => $user, 'posts' => BlogModel::getPosts(returnModels: true)]);
+        if ($this->view->getRenderType() === $this->view::RENDER_TYPE_NATIVE) {
+            $result = $this->view->render('Blog/index.phtml',
+                ['user' => $user, 'posts' => BlogModel::getPosts(returnModels: true)]);
+        } else {
+            try {
+                $result = $this->view->getTwig('Blog\Index')->render('index.twig',
+                    ['user' => $user, 'posts' => BlogModel::getPosts(returnModels: true)]);
+            } catch (Throwable $e) {
+                return 'Не удалось загрузить страницу';
+            }
+        }
+
+        return $result;
     }
 
     /**

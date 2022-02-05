@@ -17,21 +17,25 @@ class User extends AbstractController
 {
     public function loginAction()
     {
-        if (isset($_POST['email'])) {
-            $login = $_POST['email'];
-            $password = $_POST['password'] ?? null;
+        try {
+            if (isset($_POST['email'])) {
+                $login = $_POST['email'];
+                $password = $_POST['password'] ?? null;
 
-            $user = UserModel::getByEmail($login);
-            if (!$user) {
-                $this->setError('Введены неверные данные пользователя');
+                $user = UserModel::getByEmail($login);
+                if (!$user) {
+                    throw new ValidationException('Введены неверные данные пользователя');
+                }
+                if ($user->getPassword() !== UserModel::getPasswordHash($password)) {
+                    throw new ValidationException('Введены неверные данные пользователя');
+                }
+
+                $_SESSION['id'] = $user->getId();
+
+                $this->redirect('/blog/index');
             }
-            if ($user->getPassword() !== UserModel::getPasswordHash($password)) {
-                $this->setError('Введены неверные данные пользователя');
-            }
-
-            $_SESSION['id'] = $user->getId();
-
-            $this->redirect('/blog/index');
+        } catch (ValidationException $e) {
+            $this->setError($e->getMessage());
         }
 
         return $this->view->render('User/register.phtml');

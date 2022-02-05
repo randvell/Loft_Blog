@@ -8,7 +8,7 @@
 
 namespace Core;
 
-define('PROJECT_ROOT_DIR', __DIR__ . '/..');
+define('PROJECT_ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR . '..');
 
 class Config
 {

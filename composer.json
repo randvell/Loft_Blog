@@ -7,6 +7,11 @@
   },
   "require": {
     "ext-pdo": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "swiftmailer/swiftmailer": "*",
+    "twig/twig": "*"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
   }
 }

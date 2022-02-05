@@ -98,7 +98,6 @@ class Application
         /** @uses Blog::indexAction() */
         $this->router->addRoute('/blog/delete-post', Blog::class, 'deletePost');
 
-
         /** @uses Api\Blog::getPostsAction() */
         $this->router->addRoute('/api/blog/get-posts', Api\Blog::class, 'getPosts');
     }

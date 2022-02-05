@@ -8,18 +8,52 @@
 
 namespace Core;
 
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
 class View
 {
+    public const RENDER_TYPE_NATIVE = 1;
+    public const RENDER_TYPE_TWIG = 2;
+
     private string $templatePath;
-    private $data = [];
+    private int $renderType = 1;
+
+    private ?Environment $twig = null;
+
+    private array $data = [];
 
     /**
      * View constructor.
      */
-    public function __construct()
+    public function __construct(int $renderType = self::RENDER_TYPE_NATIVE)
     {
-        $this->templatePath = PROJECT_ROOT_DIR . '/app/View';
+        if ($renderType === self::RENDER_TYPE_NATIVE) {
+            $this->templatePath = PROJECT_ROOT_DIR . '/app/View';
+        } else {
+            $this->templatePath = PROJECT_ROOT_DIR . '\app\Ext\Templates';
+        }
+
         $this->initDataFromSession();
+    }
+
+    /**
+     * @return int
+     */
+    public function getRenderType(): int
+    {
+        return $this->renderType;
+    }
+
+    /**
+     * @param int $renderType
+     *
+     * @return View
+     */
+    public function setRenderType(int $renderType): View
+    {
+        $this->renderType = $renderType;
+        return $this;
     }
 
     /**
@@ -56,6 +90,23 @@ class View
     }
 
     /**
+     * Рендерим шаблон с применением Twig
+     *
+     * @return Environment
+     */
+    public function getTwig(string $tpl)
+    {
+        if (!isset($this->twig)) {
+            $path = trim($this->templatePath . '\\' . $tpl, DIRECTORY_SEPARATOR);
+            $loader = new FilesystemLoader($path);
+            $this->twig = new Environment($loader,
+                ['debug' => true, 'auto_reload' => true, 'cache' => 'cache']);
+        }
+
+        return $this->twig;
+    }
+
+    /**
      * @param string $name
      *
      * @return mixed|null
@@ -63,6 +114,16 @@ class View
     public function __get(string $name)
     {
         return $this->data[$name] ?? null;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $this->data[$name] = $value;
+        $this->$name = $value;
     }
 
     /**

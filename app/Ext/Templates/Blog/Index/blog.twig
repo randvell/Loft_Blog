@@ -1,0 +1,55 @@
+<div class="blog_container">
+    <div class="new_post">
+        <h2>Отправить сообщение</h2>
+        <form action="/blog/post" method="post" enctype="multipart/form-data">
+            <p>Сообщение: <textarea rows="10" cols="45" name="message"></textarea></p>
+            <p>Прикрепить изображение: <input type="file" name="image"></p>
+            <p><input type="submit" value="Отправить"></p>
+        </form>
+    </div>
+
+    <div class="posts_container">
+        <h2>Последние сообщения в блоге:</h2>
+        {% if posts %}
+            {% for post in posts %}
+                <div class="post">
+                    <p class="message">
+                        <span class="author">{{ post.userName }}:</span> {{ post.message }}
+                    </p>
+                    <p class="post-footer">
+                        {{ post.createdAt }}
+
+                        {% if (user.isAdmin) %}
+                            <a href="/blog/delete-post?id={{ post.id }}">Удалить</a>
+                        {% endif %}
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            В блоге еще никто не писал :(
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .posts_container {
+        display: grid;
+        grid-gap: 10px;
+    }
+
+    .post-footer {
+        font-size: small;
+    }
+
+    .author {
+        font-weight: bold;
+    }
+
+    .post-odd {
+        background: azure;
+    }
+
+    .post-even {
+        background: beige;
+    }
+</style>
